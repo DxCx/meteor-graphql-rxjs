@@ -15,7 +15,7 @@ import { addMeteorExtentions } from './meteor-graphql-ext';
 import { Observable } from './observable';
 
 const Fiber = Npm.require('fibers');
-import { DDPCommon } from 'meteor/ddp-common';
+const DDPCommon = Npm.require('meteor/ddp-common').DDPCommon;
 
 export { GraphQLSchema, specifiedRules };
 export function executeMeteor(

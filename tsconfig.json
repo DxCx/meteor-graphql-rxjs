@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": false,
+    "declaration": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": [ "dom", "es6", "esnext" ],
+    "target": "es5",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "target": "es5",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "skipLibCheck": true,
+    "stripInternal": true,
+    "noImplicitAny": false,
+    "types": [
+      "@types/meteor"
+    ]
+  },
+  "files": [
+    "./src/index.ts",
+    "./src/server.ts",
+    "./src/client.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
