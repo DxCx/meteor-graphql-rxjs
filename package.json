@@ -1,0 +1,43 @@
+{
+  "name": "meteor-graphql-rxjs",
+  "version": "0.0.1",
+  "description": "Meteor GraphQL RxJs Integration suite",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DxCx/meteor-graphql-rxjs.git"
+  },
+  "keywords": [
+    "graphql",
+    "meteor",
+    "rxjs",
+    "graphql-rxjs"
+  ],
+  "author": "Hagai Cohen <hagai.co@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DxCx/meteor-graphql-rxjs/issues"
+  },
+  "homepage": "https://github.com/DxCx/meteor-graphql-rxjs#readme",
+  "dependencies": {
+    "apollo-server-module-graphiql": "^1.0.5",
+    "graphql-rxjs": "^0.10.5-2",
+    "graphql-tools": "^1.1.0",
+    "subscriptions-transport-ws": "^0.8.2"
+  },
+  "devDependencies": {
+    "@types/graphql": "^0.10.2",
+    "meteor-typings": "^1.3.1",
+    "rxjs": "^5.4.2",
+    "graphql": "^0.10.5",
+    "typescript": "2.4.2"
+  },
+  "peerDependencies": {
+    "rxjs": "^5.4.2",
+    "graphql": "^0.10.5"
+  }
+}

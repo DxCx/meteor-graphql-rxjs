@@ -1,0 +1,7 @@
+*
+!yarn.lock
+!.gitignore
+!*.json
+package-lock.json
+!src
+!src/**/*
