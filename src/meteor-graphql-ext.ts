@@ -9,6 +9,7 @@ import {
   GraphQLSchema,
   GraphQLFieldResolver,
 } from 'graphql';
+import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { makeExecutableSchema } from 'graphql-tools';
 import { recursive as merge } from 'merge';
 import { getPackage } from './packages';
@@ -46,12 +47,59 @@ export function extendGraphiql() {
     .join('\n');
 }
 
+export function initClient(networkInterface: SubscriptionClient) {
+  EXTENTIONS.forEach((ext) => ext.initClient(networkInterface));
+}
+
 function getRootType(defaultName: string, type?: GraphQLObjectType): string {
   const typeName = type && type.name;
   return typeName || defaultName;
 }
 
 const MeteorAccountsExtention = {
+  initClient(networkInterface: SubscriptionClient) {
+    const AccountsPkg = getPackage('accounts-base');
+    if ( ! AccountsPkg ) {
+      return null;
+    }
+
+    const Accounts = AccountsPkg.Accounts;
+    const nullObserver = {
+      next: () => {},
+      error: (e) => console.error(e),
+      complete: () => {},
+    };
+
+    Accounts.onLogin(function() {
+      if ( !localStorage ) {
+        return;
+      }
+
+      var oldToken = localStorage.getItem(Accounts.LOGIN_TOKEN_KEY);
+      if ( !oldToken ) {
+        return;
+      }
+
+      networkInterface.request({
+        query: `mutation login($token: String!) {
+          loginWithToken(token: $token)
+        }`,
+        variables: {
+          token: oldToken,
+        },
+        operationName: 'login',
+      }).subscribe(nullObserver);
+    });
+
+    Accounts.onLogout(function() {
+      networkInterface.request({
+        query: `mutation logout {
+          logout
+        }`,
+        operationName: 'logout',
+      }).subscribe(nullObserver);
+    });
+  },
   extendSchema(
     rootTypes: MeteorExtentionRootTypesInfo,
   ): MeteorExtentionConfig | null {
