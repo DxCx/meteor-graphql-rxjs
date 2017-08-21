@@ -11,6 +11,7 @@ import {
 } from 'graphql';
 import { makeExecutableSchema } from 'graphql-tools';
 import { recursive as merge } from 'merge';
+import { getPackage } from './packages';
 
 export interface MeteorExtentionRootTypesInfo {
   query: string,
@@ -55,7 +56,7 @@ const MeteorAccountsExtention = {
     rootTypes: MeteorExtentionRootTypesInfo,
   ): MeteorExtentionConfig | null {
 
-    if ( ! Package['accounts-base'] ) {
+    if ( ! getPackage('accounts-base') ) {
       return null;
     }
 
@@ -80,7 +81,7 @@ const MeteorAccountsExtention = {
     };
   },
   extendGraphiql() {
-    if ( ! Package['accounts-base'] ) {
+    if ( ! getPackage('accounts-base') ) {
       return null;
     }
 

@@ -1,5 +1,3 @@
-// TODO: Eventually a package.
-
 import { SubscriptionServer } from 'subscriptions-transport-ws';
 import {
   GraphQLSchema,
@@ -15,10 +13,7 @@ import {
 
 import { parse as urlParse } from 'url';
 import { Observable } from './observable';
-
-// Meteor Imports
-import { Meteor } from 'meteor/meteor';
-import { WebApp } from 'meteor/webapp';
+import { MeteorRequire, getPackage, setRequire } from './packages';
 
 let SERVER_RUNNING = false;
 
@@ -85,6 +80,7 @@ function startServer(
   } catch ( e ) {
     return Observable.throw(e);
   }
+  const WebApp = getPackage('webapp').WebApp;
 
   return Observable.create((observer) => {
     const subscriptionServer = SubscriptionServer.create(
@@ -155,6 +151,12 @@ function startServer(
   });
 }
 
-export function runGraphQLServer(options: GraphQLServerOptions): Observable<GraphQLServerRuntime> {
+export function runGraphQLServer(mRequire: MeteorRequire, options: GraphQLServerOptions): Observable<GraphQLServerRuntime> {
+  try {
+    setRequire(mRequire);
+  } catch (e) {
+    return Observable.throw(e);
+  }
+
   return startServer(options);
 }

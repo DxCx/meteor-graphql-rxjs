@@ -11,11 +11,9 @@ import {
   ExecutionResult,
 } from 'graphql-rxjs';
 import { addMeteorExtentions } from './meteor-graphql-ext';
+import { getPackage } from './packages';
 
 import { Observable } from './observable';
-
-const Fiber = Npm.require('fibers');
-const DDPCommon = Npm.require('meteor/ddp-common').DDPCommon;
 
 export { GraphQLSchema, specifiedRules };
 export function executeMeteor(
@@ -75,15 +73,26 @@ export function createMeteorContext(createContext, payload, connectionContext) {
       createContext(payload),
       createSession(connectionContext.socket, payload.session || undefined),
     ]).then(([userContext, session]) => ({
-      userContext, session,
+      userContext,
+      session,
+      Fiber: getFibers(),
+      DDPCommon: getDDPCommon(),
     }));
   } catch (e) {
     return Promise.reject(e);
   }
 }
+function getFibers() {
+  return getPackage('fibers');
+}
+function getDDPCommon() {
+  return getPackage('ddp-common').DDPCommon;
+}
 
 function createSession(originalSocket, session?: string) {
   const server = Meteor['server'];
+  const Fiber = getFibers();
+  const DDPCommon = getDDPCommon();
 
   if ( session && server.sessions.hasOwnProperty(session) ) {
     return Promise.resolve(server.sessions[session]);
@@ -164,6 +173,7 @@ function createSession(originalSocket, session?: string) {
 }
 
 function invokeByOperation(
+  DDPCommon,
   operation: 'query' | 'subscription' | 'mutation',
   session: any,
   fn: (self: any) => void,
@@ -229,9 +239,9 @@ function meteorWrapper(
     let subscription;
     let cancelled = false;
 
-    Fiber(function() {
+    context.Fiber(function() {
       if ( ! cancelled ) {
-        invokeByOperation(operation, session, (self) => {
+        invokeByOperation(context.DDPCommon, operation, session, (self) => {
           subscription = fn({
             userContext: context.userContext,
             self,
