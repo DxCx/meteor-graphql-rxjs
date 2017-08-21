@@ -10,8 +10,13 @@ import {
 import {
   graphiqlMeteor
 } from './meteor-graphiql';
+import {
+  getGraphQLEndpoint,
+  getGraphQLEndpointShort,
+  getGraphiQLEndpoint,
+  getGraphiQLEndpointShort,
+} from './common';
 
-import { parse as urlParse } from 'url';
 import { Observable } from './observable';
 import { MeteorRequire, getPackage, setRequire } from './packages';
 
@@ -23,8 +28,6 @@ export interface GraphQLServerOptions {
   quiet?: boolean;
   graphiql?: boolean;
   graphiqlQuery?: string;
-  graphqlEndpoint?: string;
-  graphiqlEndpoint?: string;
 }
 
 export interface GraphQLServerRuntime {
@@ -42,8 +45,6 @@ function startServer(
   {
     schema,
     quiet = false,
-    graphqlEndpoint = '/graphql',
-    graphiqlEndpoint = '/graphiql',
     graphiql = false,
     graphiqlQuery = '',
     createContext = () => ({}),
@@ -61,19 +62,9 @@ function startServer(
       throw new Error('An existing instance of Meteor GraphQL Server is running, please stop it first');
     }
 
-    if ( !graphqlEndpoint.startsWith('/') ) {
-      throw new Error('GraphQL Endpoint must start with /');
-    }
-
-    if ( !graphiqlEndpoint.startsWith('/') ) {
-      throw new Error('GraphiQL Endpoint must start with /');
-    }
-
-    const parsed = urlParse(Meteor.absoluteUrl());
-
-    graphqlUrl = `ws://${parsed.host}${graphqlEndpoint}`;
+    graphqlUrl = getGraphQLEndpoint();
     if ( graphiql ) {
-      graphiqlUrl = `${parsed.protocol}//${parsed.host}${graphiqlEndpoint}`;
+      graphiqlUrl = getGraphiQLEndpoint();
     }
 
     schema = meteorPrepareSchema(schema);
@@ -96,12 +87,12 @@ function startServer(
       },
       {
         server: WebApp.httpServer,
-        path: graphqlEndpoint,
+        path: getGraphQLEndpointShort(),
       }
     );
 
     if ( graphiql ) {
-      WebApp.connectHandlers.use(graphiqlEndpoint, graphiqlMeteor({
+      WebApp.connectHandlers.use(getGraphiQLEndpointShort(), graphiqlMeteor({
         endpointURL: graphqlUrl,
         query: graphiqlQuery,
       }));
