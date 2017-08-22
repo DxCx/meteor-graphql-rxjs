@@ -14,6 +14,7 @@ import { addMeteorExtentions } from './meteor-graphql-ext';
 import { getPackage } from './packages';
 
 import { Observable } from './observable';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 export { GraphQLSchema, specifiedRules };
 export function executeMeteor(
@@ -153,6 +154,13 @@ function createSession(originalSocket, session?: string) {
     // Internal connection does not need heartbeat
     sessionObject.heartbeat.stop();
     sessionObject.heartbeat = null;
+    const userId$ = new BehaviorSubject<string>(sessionObject.userId);
+    const originalSetId = sessionObject._setUserId;
+    sessionObject.userId$ = userId$.asObservable();
+    sessionObject._setUserId = (id: string) => {
+      originalSetId.call(sessionObject, id);
+      userId$.next(id);
+    };
 
     // Internal connection does not need universal subscriptions.
     sessionObject._universalSubs = sessionObject._universalSubs.filter((sub) => {
@@ -190,6 +198,7 @@ function invokeByOperation(
   });
   Object.assign(self, {
     _session: session,
+    userId$: session.userId$,
   });
 
   switch ( operation ) {
