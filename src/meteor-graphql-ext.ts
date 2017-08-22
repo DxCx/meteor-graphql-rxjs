@@ -56,6 +56,27 @@ function getRootType(defaultName: string, type?: GraphQLObjectType): string {
   return typeName || defaultName;
 }
 
+function MeteorAccountsLogin(TokenName: string, networkInterface: SubscriptionClient, observer) {
+  if ( !localStorage ) {
+    return;
+  }
+
+  var oldToken = localStorage.getItem(TokenName);
+  if ( !oldToken ) {
+    return;
+  }
+
+  networkInterface.request({
+    query: `mutation login($token: String!) {
+    loginWithToken(token: $token)
+    }`,
+    variables: {
+      token: oldToken,
+    },
+    operationName: 'login',
+  }).subscribe(observer);
+}
+
 const MeteorAccountsExtention = {
   initClient(networkInterface: SubscriptionClient) {
     const AccountsPkg = getPackage('accounts-base');
@@ -70,25 +91,12 @@ const MeteorAccountsExtention = {
       complete: () => {},
     };
 
+    if ( Accounts.userId() ) {
+      MeteorAccountsLogin(Accounts.LOGIN_TOKEN_KEY, networkInterface, nullObserver);
+    }
+
     Accounts.onLogin(function() {
-      if ( !localStorage ) {
-        return;
-      }
-
-      var oldToken = localStorage.getItem(Accounts.LOGIN_TOKEN_KEY);
-      if ( !oldToken ) {
-        return;
-      }
-
-      networkInterface.request({
-        query: `mutation login($token: String!) {
-          loginWithToken(token: $token)
-        }`,
-        variables: {
-          token: oldToken,
-        },
-        operationName: 'login',
-      }).subscribe(nullObserver);
+      MeteorAccountsLogin(Accounts.LOGIN_TOKEN_KEY, networkInterface, nullObserver);
     });
 
     Accounts.onLogout(function() {
