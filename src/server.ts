@@ -19,6 +19,7 @@ import {
 
 import { Observable } from './observable';
 import { MeteorRequire, getPackage, setRequire } from './packages';
+import { parse as urlParse } from 'url';
 
 let SERVER_RUNNING = false;
 
@@ -86,10 +87,26 @@ function startServer(
           createMeteorContext(createContext, payload, connectionContext),
       },
       {
-        server: WebApp.httpServer,
-        path: getGraphQLEndpointShort(),
+        noServer: true,
       }
     );
+
+    // Generate upgrade handler which supports both Meteor socket and graphql.
+    const wsServer = subscriptionServer['wsServer'];
+    const upgradeHandler = (req, socket, head) => {
+      const pathname = urlParse(req.url).pathname;
+
+      if (pathname === getGraphQLEndpointShort()) {
+        wsServer.handleUpgrade(req, socket, head, (ws) => {
+          wsServer.emit('connection', ws, req);
+        });
+      } else if ( pathname.startsWith('/sockjs') ) {
+        // Don't do anything, this is meteor socket.
+      } else {
+        socket.close();
+      }
+    };
+    WebApp.httpServer.on('upgrade', upgradeHandler);
 
     if ( graphiql ) {
       WebApp.connectHandlers.use(getGraphiQLEndpointShort(), graphiqlMeteor({
@@ -135,6 +152,7 @@ function startServer(
 
       // TODO: no way of stopping server.
       // subscriptionServer.close();
+      // WebApp.httpServer.removeListener('upgrade', upgradeHandler);
 
       // TODO: Until we can really cleanup server, we cannot change state.
       // SERVER_RUNNING = false;
