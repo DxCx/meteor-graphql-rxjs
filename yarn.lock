@@ -8,10 +8,6 @@
   dependencies:
     "@types/node" "*"
 
-"@types/fibers@^0.0.29":
-  version "0.0.29"
-  resolved "https://registry.yarnpkg.com/@types/fibers/-/fibers-0.0.29.tgz#4c815209a717ede505c3040b4e3a31a7f5239d49"
-
 "@types/graphql@^0.10.1", "@types/graphql@^0.10.2":
   version "0.10.2"
   resolved "https://registry.yarnpkg.com/@types/graphql/-/graphql-0.10.2.tgz#d7c79acbaa17453b6681c80c34b38fcb10c4c08c"
@@ -845,9 +841,9 @@ graceful-fs@^4.1.2:
   version "4.1.11"
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.1.11.tgz#0e8bdfe4d1ddb8854d64e04ea7c00e2a026e5658"
 
-graphql-rxjs@^0.10.5-2:
-  version "0.10.5-2"
-  resolved "https://registry.yarnpkg.com/graphql-rxjs/-/graphql-rxjs-0.10.5-2.tgz#18d0b981dfbe1d69ad68bb1779fd7075c9f8866e"
+graphql-rxjs@^0.10.5-3:
+  version "0.10.5-3"
+  resolved "https://registry.yarnpkg.com/graphql-rxjs/-/graphql-rxjs-0.10.5-3.tgz#3e7921ab5d9fb2d66f8f4cbdd4d6f490053ae4a7"
   optionalDependencies:
     "@types/graphql" "^0.10.1"
 
