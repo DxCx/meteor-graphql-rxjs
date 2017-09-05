@@ -69,7 +69,7 @@ experiance for meteor.
         
   - Server Side:
       
-    Server side needs to be initialized by just providing a schema:
+    Server side needs to be initialized by just providing a schema and a context:
     
     ```typescript
     import { runGraphQLServer } from 'meteor-graphql-rxjs';
@@ -79,8 +79,6 @@ experiance for meteor.
     Meteor.startup(() => {
       const sub = runGraphQLServer(Npm.require, {
         schema,
-        graphiql: true,
-        graphiqlQuery: defaultQuery,
         createContext: (payload) => ({
           Messages,
         }),
