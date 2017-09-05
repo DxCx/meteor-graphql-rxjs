@@ -9,9 +9,12 @@ import {
   GraphQLSchema,
   GraphQLFieldResolver,
 } from 'graphql';
+import {
+  getScehmaSubscriptions,
+  getScehmaResolvers,
+  makeExecutableSchema,
+} from 'graphql-schema-tools';
 import { SubscriptionClient } from 'subscriptions-transport-ws';
-import { makeExecutableSchema } from 'graphql-tools';
-import { recursive as merge } from 'merge';
 import { getPackage } from './packages';
 
 export interface MeteorExtentionRootTypesInfo {
@@ -27,15 +30,20 @@ export interface MeteorExtentionConfig {
       [fieldName: string]: GraphQLFieldResolver<any, any>,
     },
   },
+  subscriptions?: {
+    [fieldName: string]: GraphQLFieldResolver<any, any>,
+  },
 };
 
 export function addMeteorExtentions(schema: GraphQLSchema): GraphQLSchema {
   const extentions = getMeteorExtentions(schema);
   const originalResolvers = getScehmaResolvers(schema);
+  const originalSubscriptions = getScehmaSubscriptions(schema);
   const originalSchema = printSchema(schema);
   const finalSchema = {
     typeDefs: [ originalSchema, ...extentions.typeDefs ],
-    resolvers: merge(true, originalResolvers, extentions.resolvers),
+    resolvers: [ originalResolvers, ...extentions.resolvers ],
+    subscriptions: [ originalSubscriptions, ...extentions.subscriptions ],
   };
 
   return makeExecutableSchema(finalSchema);
@@ -68,7 +76,7 @@ function MeteorAccountsLogin(TokenName: string, networkInterface: SubscriptionCl
 
   networkInterface.request({
     query: `mutation login($token: String!) {
-    loginWithToken(token: $token)
+      loginWithToken(token: $token)
     }`,
     variables: {
       token: oldToken,
@@ -165,43 +173,6 @@ const MeteorAccountsExtention = {
   },
 }
 
-function extendTypes(
-  schema: GraphQLSchema,
-  extentionConfig: MeteorExtentionConfig,
-): MeteorExtentionConfig {
-  const EXTEND = "extend ";
-  const parsedExt = parse(extentionConfig.typeDefs);
-
-  parsedExt.definitions = parsedExt.definitions.map((typeDef) => {
-      if ( typeDef.kind !== Kind.OBJECT_TYPE_DEFINITION ) {
-        return typeDef;
-      }
-
-      if ( !schema.getType(typeDef.name.value) ) {
-        return typeDef;
-      }
-
-      const newStart = typeDef.loc.start;
-      const newEnd = typeDef.loc.end + EXTEND.length;
-      typeDef.loc.start = EXTEND.length;
-      typeDef.loc.end = newEnd;
-
-      return {
-        kind: Kind.TYPE_EXTENSION_DEFINITION,
-        definition: typeDef,
-        loc: {
-          start: newStart,
-          end: newEnd,
-        },
-      } as any;
-    });
-
-  return {
-    typeDefs: print(parsedExt),
-    resolvers: extentionConfig.resolvers,
-  };
-}
-
 const EXTENTIONS = [
   MeteorAccountsExtention,
 ];
@@ -219,55 +190,13 @@ function getMeteorExtentions(
   return EXTENTIONS
     .map((ext) => ext.extendSchema(rootTypes))
     .filter((extConf) => !!extConf)
-    .map((ext) => extendTypes(schema, ext))
-    .reduce((res, ext) => {
-      return {
-        typeDefs: [ ...res.typeDefs, ext.typeDefs ],
-        resolvers: merge(true, res.resolvers, ext.resolvers),
-      };
-    }, {
+    .reduce((res, ext) => ({
+      typeDefs: [ ...res.typeDefs, ext.typeDefs ],
+      resolvers: [ ...res.resolvers, ext.resolvers ],
+      subscriptions: [ ...res.subscriptions, ext.subscriptions || {} ],
+    }), {
       typeDefs: [],
-      resolvers: {},
+      resolvers: [],
+      subscriptions: [],
     });
 }
-
-// get schema Resolvers, might be nice to open a PR for graphql-tools.
-function getScehmaResolvers(schema: GraphQLSchema): ({
-  [typeName: string]: { [fieldName: string]: GraphQLFieldResolver<any, any> }
-}) {
-  return Object.keys(schema.getTypeMap()).reduce((types, typeName) => {
-    // Skip internal types.
-    if ( typeName.startsWith('__') ) {
-      return types;
-    }
-
-    // TODO: solve better typing issue if this is working.
-    const type: any = schema.getType(typeName);
-
-    if ( typeof type.getFields !== 'function' ) {
-      return types;
-    }
-
-    const fields = type.getFields();
-    const fieldResolvers = Object.keys(fields).reduce((resolvers, fieldName) => {
-      if ( undefined === fields[fieldName].resolve ) {
-        return resolvers;
-      }
-
-      return {
-        ...(resolvers || {}),
-        [fieldName]: fields[fieldName].resolve,
-      };
-    }, undefined);
-
-    if ( !fieldResolvers ) {
-      return types;
-    }
-
-    return {
-      ...types,
-      [typeName]: fieldResolvers,
-    };
-  }, {});
-}
-

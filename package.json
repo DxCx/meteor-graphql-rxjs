@@ -28,8 +28,7 @@
   "dependencies": {
     "apollo-server-module-graphiql": "^1.0.5",
     "graphql-rxjs": "^0.10.5-3",
-    "graphql-tools": "^1.1.0",
-    "merge": "^1.2.0",
+    "graphql-schema-tools": "^0.0.2",
     "subscriptions-transport-ws": "^0.8.2"
   },
   "devDependencies": {
