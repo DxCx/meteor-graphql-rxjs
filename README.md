@@ -112,7 +112,7 @@ experiance for meteor.
       - `params` -> optional extra params for `SubscriptionsClient`
   - Server:
     - `runGraphQLServer(mRequire: MeteorRequire, options: GraphQLServerOptions): Observable<GraphQLServerRuntime>` - This function will return an Observable. subscribing on this observable will start the server.
-      - `mRequire` -> Mongo's Npm.Require function.
+      - `mRequire` -> Meteor's `Npm.Require` function.
       - `options` -> actual server options:
         - `schema` -> Required Parameter with GraphQLSchema to execute.
         - `createContext: (initPayload: any)` -> Optional callback to provide context per session.
