@@ -36,7 +36,7 @@ experiance for meteor.
       }
       
       type Query {
-        myMessage: [Message]
+        allMessages: [Message]
       }
       
       type Mutation {
@@ -91,7 +91,7 @@ experiance for meteor.
     
     at this point, you should have 2 new endpoints in your graphql server:
       - `/graphql` - websocket graphql endpoint.
-      - `/graphiql` - GraphiQL Interface connected to that endpoint.
+      - `/graphiql` - GraphiQL Interface connected to that endpoint. (Only if `graphiql` option = true)
   - Client Side:
 
 	Client can just import a connected network interface:
@@ -109,17 +109,71 @@ experiance for meteor.
 **TODO**
 
 #### Resolver's Context
-**TODO**
-userId$
+resolvers will be executed under Meteor's invocation, which means you can use:
+  1. `this.userId` => Same as this.userId inside any other invocation.
+  2. `this.call(methodName, ...args)` => invoke Meteor method and return promise for the result.
+  3. `this.userId$` => Observable with userId, for example:
+  
+  ```typescript
+  import { makeExecutableSchema } from 'graphql-tools';
+    
+  export const schema = makeExecutableSchema({
+      typeDefs: `
+      type Message {
+        content: String
+      }
+      
+      type Query {
+        myMessage: [Message]
+      }
+      `,
+      resolvers: {
+        Query: {
+          myMessage: (root, args, ctx) => {
+            return this.userId$.switchMap((userId) => {
+              if ( !userId ) {
+                return Observable.of(null);
+              }
+              return ctx.Messages.find({ from: userId });
+            });
+          },
+        },
+      },
+    });
+  ```
 
 #### Settings
-**TODO**
-settings.json
+this package works with [Meteor's settings](https://themeteorchef.com/tutorials/making-use-of-settings-json)
+all you need to do is add `meteor-graphql-rxjs` key, for example:
+```json
+{
+  "meteor-graphql-rxjs": {
+  	"graphqlEndpoint": "/graphql",
+  	"graphiqlEndpoint": "/graphiql"
+  }
+}
+```
+
+Avliable options:
+  - `graphqlEndpoint`: path for graphql websocket endpoint
+  - `graphiqlEndpoint`: path for graphiql interface (incase `graphiql` = true)
 
 #### Extentions
-  - Accounts
-  
-**TODO**
+This package also bring extentions with it,
+the extentions should connect between Meteor's world into GraphQL's.
+
+at the moment there is only basic functionality,
+but we can extend in the future:
+  - Accounts (`accounts-base`):
+    - Extends Schema:
+    ```graphql
+    type Mutation {
+        loginWithToken(token: String!): ID!
+        logout: ID
+    }
+    ```
+    - AutoLogin when Meteor login, auto log out when Meteor logs out.
+    - AutoLogin GraphiQL as well.
 
 #### Example Repository
 **TODO**
