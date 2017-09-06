@@ -106,7 +106,36 @@ experiance for meteor.
     ```
 
 #### API
-**TODO**
+  - Client:
+    - `function getNetworkInterface(params?: ClientOptions): SubscriptionsClient` - This function will return a
+    connected network interface that you can just send requests through or pass to apollo-client for example.
+      - `params` -> optional extra params for `SubscriptionsClient`
+  - Server:
+    - `runGraphQLServer(mRequire: MeteorRequire, options: GraphQLServerOptions): Observable<GraphQLServerRuntime>` - This function will return an Observable. subscribing on this observable will start the server.
+      - `mRequire` -> Mongo's Npm.Require function.
+      - `options` -> actual server options:
+        - `schema` -> Required Parameter with GraphQLSchema to execute.
+        - `createContext: (initPayload: any)` -> Optional callback to provide context per session.
+	  initPayload will contain connection `connect` payload.
+        - `quiet` -> Optional boolean to disable info prints.
+        - `graphiql` -> Optional boolean to enable graphiql.
+        - `graphiqlQuery` -> Optional string containing default document for GraphiQL.
+
+#### Settings
+this package works with [Meteor's settings](https://themeteorchef.com/tutorials/making-use-of-settings-json)
+all you need to do is add `meteor-graphql-rxjs` key, for example:
+```json
+{
+  "meteor-graphql-rxjs": {
+  	"graphqlEndpoint": "/graphql",
+  	"graphiqlEndpoint": "/graphiql"
+  }
+}
+```
+
+Available options:
+  - `graphqlEndpoint`: path for graphql websocket endpoint
+  - `graphiqlEndpoint`: path for graphiql interface (incase `graphiql` = true)
 
 #### Resolver's Context
 resolvers will be executed under Meteor's invocation, which means you can use:
@@ -141,22 +170,6 @@ resolvers will be executed under Meteor's invocation, which means you can use:
       },
     });
   ```
-
-#### Settings
-this package works with [Meteor's settings](https://themeteorchef.com/tutorials/making-use-of-settings-json)
-all you need to do is add `meteor-graphql-rxjs` key, for example:
-```json
-{
-  "meteor-graphql-rxjs": {
-  	"graphqlEndpoint": "/graphql",
-  	"graphiqlEndpoint": "/graphiql"
-  }
-}
-```
-
-Avliable options:
-  - `graphqlEndpoint`: path for graphql websocket endpoint
-  - `graphiqlEndpoint`: path for graphiql interface (incase `graphiql` = true)
 
 #### Extentions
 This package also bring extentions with it,
