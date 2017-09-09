@@ -141,21 +141,17 @@ function startServer(
     }
 
     return () => {
-      throw new Error('Unsubscribe not supported at the moment');
+      WebApp.httpServer.removeListener('close', closeHandler);
 
-      // WebApp.httpServer.removeListener('close', closeHandler);
+      if ( graphiql ) {
+        WebApp.connectHandlers.stack = WebApp.connectHandlers.stack.filter
+          ((routeInfo) => routeInfo.route !== getGraphQLEndpointShort());
+      }
 
-      // if ( graphiql ) {
-      //   WebApp.connectHandlers.stack = WebApp.connectHandlers.stack.filter
-      //     ((routeInfo) => routeInfo.route !== graphiqlEndpoint);
-      // }
+      subscriptionServer.close();
+      WebApp.httpServer.removeListener('upgrade', upgradeHandler);
 
-      // TODO: no way of stopping server.
-      // subscriptionServer.close();
-      // WebApp.httpServer.removeListener('upgrade', upgradeHandler);
-
-      // TODO: Until we can really cleanup server, we cannot change state.
-      // SERVER_RUNNING = false;
+      SERVER_RUNNING = false;
     };
   });
 }
