@@ -1,6 +1,6 @@
 {
   "name": "meteor-graphql-rxjs",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Meteor GraphQL RxJs Integration suite",
   "main": "dist/index.js",
   "scripts": {
