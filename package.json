@@ -1,6 +1,6 @@
 {
   "name": "meteor-graphql-rxjs",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Meteor GraphQL RxJs Integration suite",
   "main": "dist/index.js",
   "scripts": {
@@ -28,7 +28,7 @@
   "dependencies": {
     "apollo-server-module-graphiql": "^1.1.6",
     "graphql-rxjs": "^0.11.7-0",
-    "graphql-schema-tools": "^0.0.5",
+    "graphql-schema-tools": "^0.0.6",
     "subscriptions-transport-ws": "^0.9.1"
   },
   "devDependencies": {
