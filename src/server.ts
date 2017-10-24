@@ -29,6 +29,7 @@ export interface GraphQLServerOptions {
   quiet?: boolean;
   graphiql?: boolean;
   graphiqlQuery?: string;
+  websocketFallback?: (req: any, socket: any, head: any) => void;
 }
 
 export interface GraphQLServerRuntime {
@@ -49,12 +50,21 @@ function startServer(
     graphiql = false,
     graphiqlQuery = '',
     createContext = () => ({}),
+    websocketFallback = (req, socket, head) => {
+      if ( socket.destroy ) {
+        socket.destroy();
+      }
+    },
   }: GraphQLServerOptions
 ) : Observable<any> {
   let graphqlUrl;
   let graphiqlUrl;
 
   try {
+    if ( !schema ) {
+      throw new Error('Schema was not provided');
+    }
+
     if ( !Meteor.isServer ) {
       throw new Error('GraphQL Server can run only on Meteor Server');
     }
@@ -103,7 +113,7 @@ function startServer(
       } else if ( pathname.startsWith('/sockjs') ) {
         // Don't do anything, this is meteor socket.
       } else {
-        socket.close();
+        websocketFallback(req, socket, head);
       }
     };
     WebApp.httpServer.on('upgrade', upgradeHandler);
