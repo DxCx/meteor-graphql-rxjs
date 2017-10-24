@@ -10,8 +10,8 @@ import {
   GraphQLFieldResolver,
 } from 'graphql';
 import {
-  getScehmaSubscriptions,
-  getScehmaResolvers,
+  getSchemaSubscriptions,
+  getSchemaResolvers,
   makeExecutableSchema,
 } from 'graphql-schema-tools';
 import { SubscriptionClient } from 'subscriptions-transport-ws';
@@ -37,8 +37,8 @@ export interface MeteorExtentionConfig {
 
 export function addMeteorExtentions(schema: GraphQLSchema): GraphQLSchema {
   const extentions = getMeteorExtentions(schema);
-  const originalResolvers = getScehmaResolvers(schema);
-  const originalSubscriptions = getScehmaSubscriptions(schema);
+  const originalResolvers = getSchemaResolvers(schema);
+  const originalSubscriptions = getSchemaSubscriptions(schema);
   const originalSchema = printSchema(schema);
   const finalSchema = {
     typeDefs: [ originalSchema, ...extentions.typeDefs ],
